@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Growders — Asistente Comercial WhatsApp" />
+  <title>Growders — Demo Comercial</title>
+  <link rel="stylesheet" href="./assets/css/main.css" />
+  <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <span class="logo-g">G</span>
+      <span class="logo-text">rowders</span>
+    </div>
+    <nav class="sidebar__nav">
+      <a class="nav-item nav-item--active" href="#">
+        <span class="nav-icon">💬</span> Simulador
+      </a>
+      <a class="nav-item" href="#" data-soon>
+        <span class="nav-icon">📋</span> Casos
+      </a>
+      <a class="nav-item" href="#" data-soon>
+        <span class="nav-icon">📚</span> Base Operativa
+      </a>
+      <a class="nav-item" href="#" data-soon>
+        <span class="nav-icon">📊</span> Analytics
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <span class="env-badge" id="envBadge">demo</span>
+      v0.1.0
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar__title">Simulador de Demo</div>
+      <div class="topbar__actions">
+        <button class="btn btn--ghost btn--sm" id="clearBtn" title="Nueva conversación">
+          🗑 Nueva conversación
+        </button>
+      </div>
+    </header>
+
+    <!-- ── WhatsApp-style simulator ──────────────────── -->
+    <section class="simulator">
+
+      <div class="phone-frame">
+
+        <!-- WhatsApp header bar -->
+        <div class="wa-header">
+          <div class="wa-avatar">M</div>
+          <div class="wa-info">
+            <div class="wa-name">MarIA — Asistente Virtual</div>
+            <div class="wa-status" id="waStatus">en línea</div>
+          </div>
+        </div>
+
+        <!-- Messages area -->
+        <div class="wa-messages" id="messages" role="log" aria-live="polite" aria-label="Conversación con MarIA">
+          <!-- Messages injected by JS -->
+        </div>
+
+        <!-- Input area -->
+        <div class="wa-input">
+          <textarea
+            id="userInput"
+            class="wa-textarea"
+            placeholder="Escribe un mensaje…"
+            rows="1"
+            maxlength="500"
+            aria-label="Mensaje"
+          ></textarea>
+          <button class="wa-send" id="sendBtn" aria-label="Enviar">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick scenario buttons -->
+      <div class="scenarios">
+        <p class="scenarios__label">Escenarios sugeridos:</p>
+        <div class="scenarios__buttons">
+          <button class="scenario-btn" data-msg="Hola, ¿en qué me pueden ayudar?">Saludo</button>
+          <button class="scenario-btn" data-msg="¿Cuál es su horario de atención?">Horario</button>
+          <button class="scenario-btn" data-msg="Necesito 50 playeras con mi logo, ¿cuánto cuesta?">Cotización</button>
+          <button class="scenario-btn" data-msg="¿Cuánto tardan en entregar un pedido?">Entrega</button>
+          <button class="scenario-btn" data-msg="Mi pedido ORD-20260601-0001, ¿ya está listo?">Orden</button>
+          <button class="scenario-btn" data-msg="Nadie me ha contestado y ya llevo 3 días esperando, qué mal servicio">Queja</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>

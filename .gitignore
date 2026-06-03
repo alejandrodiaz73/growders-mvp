@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite
+*.db
+data/
+
+# Env files — NEVER commit
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+dist/
+.parcel-cache/
+.vite/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+backend/tests/load/results/
+
+# Keys / secrets
+*.pem
+*.key
+credentials.json
+service-account*.json

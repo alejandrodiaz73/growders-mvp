@@ -1,0 +1,18 @@
+# ─────────────────────────────────────────────────────────────────
+# Growders MVP — railway.toml
+# Tells Railway how to build and run the backend.
+#
+# Railway auto-detects Python and uses this file for overrides.
+# Reference: https://docs.railway.app/reference/config-as-code
+# ─────────────────────────────────────────────────────────────────
+
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

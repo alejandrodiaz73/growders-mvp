@@ -1,0 +1,321 @@
+/* ─────────────────────────────────────────────────────────────────
+   Growders MVP — main.css
+   Design tokens + layout + WhatsApp simulator
+   ───────────────────────────────────────────────────────────────── */
+
+/* ── Tokens ────────────────────────────────────────────────────── */
+:root {
+  --color-bg:          #0d1117;
+  --color-surface:     #161b22;
+  --color-surface-2:   #1f2937;
+  --color-border:      #30363d;
+  --color-accent:      #c25e29;   /* Growders copper */
+  --color-accent-dim:  #8b4219;
+  --color-text:        #e6edf3;
+  --color-text-muted:  #8b949e;
+  --color-success:     #3fb950;
+  --color-danger:      #f85149;
+
+  /* WhatsApp colours */
+  --wa-bg:             #0b141a;
+  --wa-header:         #1f2c33;
+  --wa-bubble-in:      #1f2c33;
+  --wa-bubble-out:     #005c4b;
+  --wa-input-bg:       #1f2c33;
+  --wa-text:           #e9edef;
+  --wa-text-muted:     #8696a0;
+
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --shadow:      0 4px 24px rgba(0,0,0,.4);
+  --font:        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono:   "Fira Code", "Cascadia Code", monospace;
+}
+
+/* ── Reset ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+a { color: var(--color-accent); text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ── App shell ───────────────────────────────────────────────────── */
+.app-shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.sidebar__logo {
+  padding: 0 20px 24px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.logo-g { color: var(--color-accent); }
+.logo-text { color: var(--color-text); }
+
+.sidebar__nav { flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-item:hover,
+.nav-item--active {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.nav-item--active { border-left: 3px solid var(--color-accent); padding-left: 17px; }
+.nav-item[data-soon] { opacity: 0.5; pointer-events: none; }
+.nav-icon { font-size: 16px; }
+
+.sidebar__footer {
+  padding: 16px 20px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.env-badge {
+  background: var(--color-accent-dim);
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Main area ───────────────────────────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 56px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+.topbar__title { font-weight: 600; font-size: 15px; }
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  padding: 8px 14px;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.btn--ghost:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+.btn--sm { padding: 5px 10px; font-size: 12px; }
+
+/* ── Simulator layout ────────────────────────────────────────────── */
+.simulator {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px;
+  overflow-y: auto;
+  gap: 20px;
+}
+
+/* ── Phone frame ─────────────────────────────────────────────────── */
+.phone-frame {
+  width: 100%;
+  max-width: 420px;
+  height: 580px;
+  background: var(--wa-bg);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+/* ── WhatsApp header ─────────────────────────────────────────────── */
+.wa-header {
+  background: var(--wa-header);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+.wa-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.wa-name { font-size: 15px; font-weight: 600; color: var(--wa-text); }
+.wa-status { font-size: 12px; color: var(--color-success); }
+
+/* ── Messages ────────────────────────────────────────────────────── */
+.wa-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  scroll-behavior: smooth;
+}
+.wa-messages::-webkit-scrollbar { width: 4px; }
+.wa-messages::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+.bubble {
+  max-width: 78%;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+  position: relative;
+}
+.bubble--in {
+  background: var(--wa-bubble-in);
+  color: var(--wa-text);
+  align-self: flex-start;
+  border-top-left-radius: 4px;
+}
+.bubble--out {
+  background: var(--wa-bubble-out);
+  color: var(--wa-text);
+  align-self: flex-end;
+  border-top-right-radius: 4px;
+}
+.bubble__time {
+  font-size: 10px;
+  color: var(--wa-text-muted);
+  margin-top: 4px;
+  text-align: right;
+}
+.bubble--typing { opacity: 0.6; font-style: italic; }
+
+/* ── Input ───────────────────────────────────────────────────────── */
+.wa-input {
+  background: var(--wa-input-bg);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+.wa-textarea {
+  flex: 1;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--wa-text);
+  font-size: 14px;
+  font-family: var(--font);
+  padding: 10px 14px;
+  resize: none;
+  outline: none;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.4;
+}
+.wa-textarea::placeholder { color: var(--wa-text-muted); }
+.wa-textarea:focus { border-color: var(--color-accent); }
+
+.wa-send {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.wa-send:hover { background: var(--color-accent-dim); }
+.wa-send:disabled { background: var(--color-border); cursor: not-allowed; }
+
+/* ── Scenario buttons ────────────────────────────────────────────── */
+.scenarios {
+  width: 100%;
+  max-width: 420px;
+}
+.scenarios__label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.scenarios__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.scenario-btn {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-lg);
+  padding: 5px 12px;
+  font-size: 12px;
+  transition: background 0.15s, color 0.15s;
+}
+.scenario-btn:hover {
+  background: var(--color-accent-dim);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}

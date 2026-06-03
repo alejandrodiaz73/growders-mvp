@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────────
+# Growders MVP — docker-compose.yml
+# Local development with PostgreSQL + Redis (Tier 1 simulation).
+#
+# Usage:
+#   docker compose up -d          # start services
+#   docker compose down -v        # stop and remove volumes
+#
+# The FastAPI backend runs WITHOUT Docker (via uvicorn in your venv).
+# Docker here only provides the infrastructure dependencies.
+# ─────────────────────────────────────────────────────────────────
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: growders_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: growders
+      POSTGRES_PASSWORD: growders_dev
+      POSTGRES_DB: growders_mvp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U growders -d growders_mvp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: growders_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # Optional: pgAdmin for database inspection
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@growders.dev
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
