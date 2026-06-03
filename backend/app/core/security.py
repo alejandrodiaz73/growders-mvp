@@ -66,8 +66,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
 
         # Remove headers that leak server info
-        response.headers.pop("X-Powered-By", None)
-        response.headers.pop("Server", None)
+        if "x-powered-by" in response.headers:
+            del response.headers["x-powered-by"]
+        if "server" in response.headers:
+            del response.headers["server"]
 
         return response
 
