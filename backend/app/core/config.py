@@ -41,7 +41,12 @@ class Settings(BaseSettings):
     @property
     def effective_database_url(self) -> str:
         if self.database_url:
-            return self.database_url
+            url = self.database_url
+            # Railway injects postgresql:// — SQLAlchemy async needs postgresql+asyncpg://
+            if url.startswith("postgresql://") or url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url
         return "sqlite+aiosqlite:///./data/growders.db"
 
     # ── Cache ─────────────────────────────────────────────────────────────
