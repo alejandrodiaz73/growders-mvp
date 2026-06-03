@@ -49,17 +49,23 @@ def _make_engine() -> AsyncEngine:
     url = settings.effective_database_url
     is_sqlite = url.startswith("sqlite")
 
-    connect_args: dict = {}
     if is_sqlite:
-        connect_args["check_same_thread"] = False
+        # SQLite + aiosqlite uses NullPool — pool_size/max_overflow not supported
+        from sqlalchemy.pool import NullPool
+        return create_async_engine(
+            url,
+            echo=settings.db_echo,
+            connect_args={"check_same_thread": False},
+            poolclass=NullPool,
+        )
 
+    # PostgreSQL — full connection pool
     return create_async_engine(
         url,
         echo=settings.db_echo,
-        pool_size=1 if is_sqlite else settings.db_pool_size,
-        max_overflow=0 if is_sqlite else settings.db_max_overflow,
-        pool_pre_ping=True,          # detect stale connections
-        connect_args=connect_args,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_max_overflow,
+        pool_pre_ping=True,
     )
 
 
