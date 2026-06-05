@@ -11,7 +11,9 @@
  */
 
 // ── Config ────────────────────────────────────────────────────────
-const API_BASE = `${window.location.origin}/api/v1`;
+const API_BASE = window.GROWDERS_API_URL
+  ? `${window.GROWDERS_API_URL}/api/v1`
+  : `${window.location.origin}/api/v1`;   // fallback local dev
 
 // Demo tenant ID — in production this comes from the auth session
 // Replace with your actual tenant UUID once DB is seeded
