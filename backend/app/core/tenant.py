@@ -43,7 +43,8 @@ class TenantMiddleware(BaseHTTPMiddleware):
     ])
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        if request.url.path in self.PUBLIC_PATHS:
+        # OPTIONS preflights never carry X-Tenant-ID; let CORSMiddleware handle them.
+        if request.method == "OPTIONS" or request.url.path in self.PUBLIC_PATHS:
             return await call_next(request)
 
         tenant_id_str = request.headers.get("X-Tenant-ID")
