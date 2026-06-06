@@ -2,4 +2,4 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "npx serve src -l $PORT --no-clipboard --single --entry-point pages/index.html"
+startCommand = "npx serve src -l $PORT --no-clipboard"
