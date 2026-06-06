@@ -39,15 +39,15 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     _CSP = (
         "default-src 'self'; "
         "script-src 'self'; "
-        "style-src 'self' 'unsafe-inline'; "   # needed for dynamic HTML in MVP
+        "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self'; "
-        "connect-src 'self'; "
+        "connect-src 'self' https://growders-mvp-production.up.railway.app; "
         "frame-ancestors 'none'; "
         "base-uri 'self'; "
         "form-action 'self';"
     )
-
+    
     async def dispatch(self, request: Request, call_next) -> Response:
         response: Response = await call_next(request)
 
