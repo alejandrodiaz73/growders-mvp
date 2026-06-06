@@ -94,9 +94,18 @@ class Settings(BaseSettings):
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
+    # Railway auto-injects RAILWAY_PUBLIC_DOMAIN (e.g. growders-mvp-production.up.railway.app).
+    # We include it in trusted_hosts so TrustedHostMiddleware never blocks its own hostname.
+    railway_public_domain: str = ""
+
     @property
     def trusted_hosts(self) -> list[str]:
-        return [h.strip() for h in self.allowed_hosts.split(",") if h.strip()]
+        hosts = [h.strip() for h in self.allowed_hosts.split(",") if h.strip()]
+        if self.railway_public_domain:
+            host = self.railway_public_domain.strip()
+            if host and host not in hosts:
+                hosts.append(host)
+        return hosts
 
     # ── Async / Workers ───────────────────────────────────────────────────
     task_backend: Literal["fastapi", "celery"] = "fastapi"
