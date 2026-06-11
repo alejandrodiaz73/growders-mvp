@@ -1,9 +1,13 @@
 # ─────────────────────────────────────────────────────────────────
-# Growders MVP — railway.toml
-# Tells Railway how to build and run the backend.
+# Growders MVP — railway.toml (backend)
 #
-# Railway auto-detects Python and uses this file for overrides.
-# Reference: https://docs.railway.app/reference/config-as-code
+# IMPORTANTE: startCommand corre PRIMERO las migraciones de Alembic
+# y LUEGO arranca uvicorn. Si la migración falla, el deploy se detiene.
+#
+# Orden en cada deploy:
+#   1. alembic upgrade head  → aplica migraciones pendientes
+#   2. python -m scripts.seed_demo → inserta tenant demo si no existe
+#   3. uvicorn              → arranca la app
 # ─────────────────────────────────────────────────────────────────
 
 [build]
@@ -11,7 +15,7 @@ builder = "nixpacks"
 buildCommand = "pip install -r requirements.txt"
 
 [deploy]
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2"
+startCommand = "alembic upgrade head && python -m scripts.seed_demo && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"

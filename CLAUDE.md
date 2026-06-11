@@ -12,7 +12,7 @@ El agente responde basado EXCLUSIVAMENTE en la información del negocio (groundi
 Si no sabe, escala al humano. Nunca inventa.
 
 **Responsable:** Alex (CEO/CTO). Claude actúa como socio técnico.
-**Fase actual:** Sprint 1 cerrado. Sprint 2 en curso.
+**Fase actual:** Sprint 2 en curso.
 **Repos activos:**
 - MVP (este repo): Railway.app — `https://growders-mvp-production.up.railway.app`
 - Frontend: Railway.app — `https://growders-demo-production.up.railway.app`
@@ -74,28 +74,98 @@ Cambiar de Tier 0 a Tier 1 = cambiar una variable de entorno, no reescribir cód
 ```
 growders-mvp/
 ├── backend/
+│   ├── alembic/              — Migraciones de BD (Sprint 2)
+│   │   ├── env.py            — Config async, corrige URLs de Railway
+│   │   ├── script.py.mako    — Template para nuevas migraciones
+│   │   └── versions/
+│   │       └── 0001_initial_schema.py
+│   ├── alembic.ini           — Config Alembic (URL viene de env.py, no de aquí)
 │   ├── app/
-│   │   ├── api/          — chat.py, health.py
-│   │   ├── core/         — config.py, security.py, tenant.py, logging.py
-│   │   ├── db/           — session.py (async SQLAlchemy + RLS)
-│   │   ├── models/       — base.py, tenant.py, conversation.py
-│   │   ├── services/     — cache.py, llm.py
-│   │   ├── agents/       — vacío (LangGraph entra Sprint 9)
+│   │   ├── api/              — chat.py, health.py
+│   │   ├── core/             — config.py, security.py, tenant.py, logging.py
+│   │   ├── db/               — session.py (async SQLAlchemy + RLS)
+│   │   ├── models/           — base.py, tenant.py, conversation.py
+│   │   ├── services/         — cache.py, llm.py
+│   │   ├── agents/           — vacío (LangGraph entra Sprint 9)
 │   │   └── main.py
+│   ├── scripts/
+│   │   └── seed_demo.py      — Inserta tenant demo (idempotente)
 │   ├── tests/
 │   │   ├── unit/test_chat.py
 │   │   └── load/chat_load_test.js (k6)
 │   ├── requirements.txt
-│   └── railway.toml      — Root Directory: /backend
+│   └── railway.toml          — Root Directory: /backend
 ├── frontend/
 │   ├── src/
 │   │   ├── index.html
 │   │   └── assets/css/ + assets/js/
 │   ├── package.json
-│   └── railway.toml      — Root Directory: /frontend
+│   └── railway.toml          — Root Directory: /frontend
 ├── infra/docker/docker-compose.yml
-└── CLAUDE.md             — este archivo
+└── CLAUDE.md                 — este archivo
 ```
+
+---
+
+## Base de datos — reglas críticas
+
+### Alembic maneja PostgreSQL. init_db() maneja SQLite. Nunca mezclar.
+
+- **PostgreSQL (Railway):** NUNCA llamar `init_db()` ni `Base.metadata.create_all()` directamente.
+  Las tablas las crea Alembic. Hacerlo rompe el historial de migraciones.
+- **SQLite (dev local sin DATABASE_URL):** `init_db()` en el lifespan crea tablas automáticamente.
+  Esto ya está implementado en `main.py` y `session.py` — no modificar.
+
+### Flujo de migraciones
+
+```powershell
+# Crear nueva migración (desde backend/)
+alembic revision --autogenerate -m "descripción corta"
+
+# Revisar el archivo generado en alembic/versions/ ANTES de aplicar
+# Alembic a veces genera cosas incorrectas con enums en PostgreSQL
+
+# Aplicar migraciones pendientes
+alembic upgrade head
+
+# Ver estado actual
+alembic current
+
+# Ver historial
+alembic history --verbose
+```
+
+### Seed del tenant demo
+
+```powershell
+# Desde backend/ — idempotente, seguro correr múltiples veces
+python -m scripts.seed_demo
+```
+
+- UUID demo: `00000000-0000-0000-0000-000000000001`
+- Slug: `demo` | Nombre: `Uniformes Vicky` | Plan: `basic` | Status: `demo`
+
+### Corrección automática de URLs
+
+Railway inyecta `postgresql://` — los dos componentes lo corrigen automáticamente:
+- `session.py` → convierte a `postgresql+asyncpg://` (async, para la app)
+- `alembic/env.py` → convierte a `postgresql+psycopg2://` (sync, para migraciones)
+- **NUNCA** hardcodear URLs de conexión en ningún archivo
+
+### RLS (Row-Level Security)
+
+- Habilitado en: `conversations`, `cases`, `tenant_users`
+- La policy lee `current_setting('app.current_tenant_id', true)::uuid`
+- `session.py` ejecuta `SET LOCAL app.current_tenant_id = '<uuid>'` antes de cada query
+- **NUNCA** hacer queries a tablas tenant-scoped sin pasar por `get_db()` o `get_db_context()`
+
+### Al agregar un modelo nuevo
+
+1. Crear en `app/models/nuevo.py`
+2. Importarlo en `alembic/env.py` (sección de imports de modelos)
+3. Correr `alembic revision --autogenerate -m "add nuevo table"`
+4. Revisar el archivo generado antes de aplicar
+5. Correr `alembic upgrade head`
 
 ---
 
@@ -163,18 +233,26 @@ ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 | CSP `connect-src 'self'` bloquea fetch cross-origin | Agregar dominio del backend explícitamente |
 | `serve` necesita apuntar a donde está `index.html` | Estructura de carpetas debe coincidir con `startCommand` |
 | Railway no redeploya al cambiar env vars | Requiere redeploy manual desde el dashboard |
+| Alembic necesita engine síncrono (psycopg2) | `session.py` usa asyncpg — `alembic/env.py` usa psycopg2, son independientes |
+| `alembic revision --autogenerate` puede fallar con enums PG | Revisar siempre el archivo generado antes de `alembic upgrade head` |
 
 ---
 
-## Pendientes Sprint 2 (en curso)
+## Pendientes Sprint 2 (en curso) — deadline lunes 15-jun
 
-| Tarea | Descripción | Prioridad |
+| Tarea | Descripción | Estado |
 |---|---|---|
-| Alembic | Configurar migraciones. Tablas no creadas en PostgreSQL (`init_db` solo funciona con SQLite) | ALTA |
-| Seed tenant demo | El UUID `00000000-0000-0000-0000-000000000001` no tiene registro real en la tabla `tenants` | ALTA |
-| Knowledge Base CRUD | Base Operativa con pgvector para RAG | ALTA |
-| LLM real | Conectar Groq o OpenAI (`LLM_PROVIDER=groq` o `openai`) | ALTA |
-| ALLOWED_HOSTS | Verificar que incluye el dominio correcto del backend en Railway | MEDIA |
+| Alembic + migración inicial | Tablas + enums + RLS + pgvector en PostgreSQL | ✅ Listo |
+| Seed tenant demo | UUID `00000000-0000-0000-0000-000000000001` = Uniformes Vicky | ✅ Listo |
+| Knowledge Base CRUD | Tabla `knowledge_entries` + pgvector para RAG | ⏳ Siguiente |
+| LLM real (Groq) | `LLM_PROVIDER=groq` en Railway | ⏳ Pendiente |
+| Formulario onboarding | Sin auth — acceso por tenant slug | ⏳ Pendiente |
+
+**Fuera del Sprint 2 — no agregar:**
+- Auth con Clerk.js → Sprint 4
+- LangGraph → Sprint 9
+- WhatsApp webhook → Sprint 5
+- Google Calendar → Sprint 4
 
 ---
 
@@ -190,9 +268,18 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 pytest tests/unit -v
 pytest tests/unit -v --cov=app --cov-report=html
 
+# Migraciones
+alembic upgrade head
+alembic revision --autogenerate -m "descripción"
+alembic current
+alembic history --verbose
+
+# Seed
+python -m scripts.seed_demo
+
 # Deploy (Railway auto-detecta el push)
-git add .
-git commit -m "descripción"
+git add <archivos específicos>
+git commit -m "sprint2: descripción"
 git push origin main
 
 # Verificar producción
@@ -207,7 +294,7 @@ curl https://growders-mvp-production.up.railway.app/health
 |---|---|---|
 | Scaffold | Config, security, multi-tenant, cache, LLM, DB, modelos base | ✅ Completo |
 | Sprint 1 | Fix 500→400, deploy frontend, CORS, ALLOWED_ORIGINS | ✅ Completo |
-| Sprint 2 | Knowledge Base + pgvector, Alembic, seed tenant, LLM real | ⏳ En curso |
+| Sprint 2 | Alembic, seed tenant, Knowledge Base + pgvector, LLM real | ⏳ En curso |
 | Sprint 3 | Cases module — creación, asignación, cierre, handoff humano | Pendiente |
 | Sprint 4 | Google Calendar integration | Pendiente |
 | Sprint 5 | WhatsApp webhook (360Dialog) | Pendiente |
@@ -223,4 +310,4 @@ curl https://growders-mvp-production.up.railway.app/health
 
 | Decisión | Detalle | Sprint planificado |
 |---|---|---|
-| Autenticación panel admin | Clerk.js — se implementa después de que Sprint 3 (onboarding sin auth) esté estable | Sprint 4 |
+| Autenticación panel admin | Clerk.js — después de que Sprint 3 (onboarding sin auth) esté estable | Sprint 4 |
